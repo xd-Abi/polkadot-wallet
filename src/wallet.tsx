@@ -1,9 +1,11 @@
 import {useEffect, useState} from "react";
 import {ScProvider} from "@polkadot/rpc-provider/substrate-connect";
 import * as Sc from "@substrate/connect";
+import {WellKnownChain} from "@substrate/connect";
 import {ApiPromise, Keyring} from "@polkadot/api";
 import {
   cryptoWaitReady,
+  decodeAddress,
   mnemonicGenerate,
   mnemonicToMiniSecret,
   mnemonicValidate,
@@ -16,24 +18,17 @@ export function Wallet() {
   const [recipient, setRecipient] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [mnemonic, setMnemonic] = useState<string>("");
+  const [balance, setBalance] = useState<string>("");
 
   useEffect(() => {
-    const saveToStorage = (mnemonic: string) => {
-      localStorage.setItem("polkadot_mnemonic", mnemonic);
-    };
-
-    const loadFromStorage = () => {
-      return localStorage.getItem("polkadot_mnemonic");
-    };
-
     const initWallet = async () => {
-      const provider = new ScProvider(Sc, Sc.WellKnownChain.polkadot);
+      const provider = new ScProvider(Sc, WellKnownChain.westend2);
       await provider.connect();
       const api = await ApiPromise.create({provider});
       setApi(api);
 
       await cryptoWaitReady();
-      let walletMnemonic = loadFromStorage();
+      let walletMnemonic = localStorage.getItem("polkadot_mnemonic");
 
       if (!walletMnemonic) {
         const generatedMnemonic = mnemonicGenerate();
@@ -44,7 +39,7 @@ export function Wallet() {
           return;
         }
 
-        saveToStorage(generatedMnemonic);
+        localStorage.setItem("polkadot_mnemonic", generatedMnemonic);
         walletMnemonic = generatedMnemonic;
       }
 
@@ -55,10 +50,55 @@ export function Wallet() {
       setMnemonic(walletMnemonic);
       setKeyPair(pair);
       setAddress(pair.address);
+
+      const data = await api.query.system.account(pair.address);
+      const {
+        data: {free},
+      } = JSON.parse(data.toString());
+      setBalance(free);
     };
 
     initWallet().catch(console.error);
   }, []);
+
+  const transfer = async () => {
+    if (!keyPair || !recipient || !amount || !api) {
+      console.error("Missing required details to send funds.");
+      return;
+    }
+
+    if (!api.isReady) {
+      console.error("API is not ready.");
+      return;
+    }
+
+    try {
+      const to = decodeAddress(recipient);
+      const transfer = api.tx.balances.transferAllowDeath(to, BigInt(amount));
+      const unsub = await transfer.signAndSend(
+        keyPair,
+        ({status, events}: any) => {
+          if (status.isInBlock) {
+            console.log(
+              "Transaction included at blockHash",
+              status.asInBlock.toHex()
+            );
+          } else if (status.isFinalized) {
+            console.log(
+              "Transaction finalized at blockHash",
+              status.asFinalized.toHex()
+            );
+          }
+
+          events.forEach(({event: {method, section}, phase}: any) => {
+            console.log("Event:", phase.toString(), `: ${section}.${method}`);
+          });
+        }
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return (
     <div>
@@ -73,6 +113,10 @@ export function Wallet() {
         <p>{address}</p>
       </div>
       <div>
+        <h3>Balance:</h3>
+        <p>{balance}</p>
+      </div>
+      <div>
         <input
           type="text"
           placeholder="Recipient Address"
@@ -85,7 +129,7 @@ export function Wallet() {
           value={amount}
           onChange={e => setAmount(e.target.value)}
         />
-        <button>Transfer Funds</button>
+        <button onClick={transfer}>Transfer Funds</button>
       </div>
     </div>
   );
