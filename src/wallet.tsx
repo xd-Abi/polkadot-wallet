@@ -101,35 +101,17 @@ export function Wallet() {
   };
 
   return (
-    <div>
-      <h2>Polkadot Wallet</h2>
-      <div>
-        <h3>Generated Mnemonic:</h3>
-        <p>{mnemonic}</p>
-      </div>
-
-      <div>
-        <h3>Wallet Address:</h3>
-        <p>{address}</p>
-      </div>
-      <div>
-        <h3>Balance:</h3>
-        <p>{balance}</p>
-      </div>
-      <div>
-        <input
-          type="text"
-          placeholder="Recipient Address"
-          value={recipient}
-          onChange={e => setRecipient(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Amount to Send"
-          value={amount}
-          onChange={e => setAmount(e.target.value)}
-        />
-        <button onClick={transfer}>Transfer Funds</button>
+    <div className="w-full min-h-screen bg-black text-white p-4 font-roboto">
+      <div className="max-w-lg mx-auto mt-20">
+        <div
+          className="w-full h-72 bg-contain bg-no-repeat p-8"
+          style={{backgroundImage: "url('/card.svg')"}}
+        >
+          <div className="text-lg font-medium text-transparent bg-white bg-opacity-50 bg-clip-text">
+            Current Balance
+          </div>
+          <div className="text-white text-3xl font-medium mt-1">{balance}</div>
+        </div>
       </div>
     </div>
   );
