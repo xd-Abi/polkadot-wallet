@@ -7,7 +7,7 @@ module.exports = {
         primary: "#fcec4c",
       },
       fontFamily: {
-        "rubik-bubbles": ['"Rubik Bubbles"', "system-ui"],
+        "bebas-neue": ['"Bebas Neue"', "sans-serif"],
         roboto: ['"Roboto"', "sans-serif"],
       },
     },

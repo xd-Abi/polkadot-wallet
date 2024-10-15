@@ -103,7 +103,21 @@ export function Wallet() {
   return (
     <div className="w-full min-h-screen bg-black text-white p-4 font-roboto">
       <div className="max-w-lg mx-auto mt-20">
-        <div
+        <div className="text-5xl font-bold">Wallet</div>
+        <div className="w-full h-64 bg-rose-600 mt-8 rounded-xl px-5 py-7 flex flex-col">
+          <div className="w-full flex items-start justify-between">
+            <div className="font-medium font-bebas-neue text-[2.5rem] leading-[2.2rem]">
+              Westend
+            </div>
+            <div className="text-white text-opacity-60 text-sm">VIRTUAL</div>
+          </div>
+          <div className="h-full w-full flex items-end justify-between">
+            <div className="text-white text-opacity-80 text-lg">
+              {address.substring(0, 6)} ... {address.substring(42)}
+            </div>
+          </div>
+        </div>
+        {/* <div
           className="w-full h-[19rem] bg-cover bg-no-repeat p-8"
           style={{ backgroundImage: "url('/card.svg')" }}
         >
@@ -111,8 +125,64 @@ export function Wallet() {
             Current Balance
           </div>
           <div className="text-white text-3xl font-medium mt-1">{balance}</div>
-        </div>
-        <div className="w-full mt-10 grid grid-cols-4 gap-2">
+          <div className="text-lg text-transparent bg-white font-bold bg-clip-text mt-12">
+            Polkadot Westend
+          </div>
+          <div className="text-white text-3xl font-medium mt-2">
+            {address.substring(0, 6)} ... {address.substring(42)}
+          </div>
+        </div> */}
+        {/* <div className="w-full mt-10 grid grid-cols-4 gap-2">
+          <div className="w-full flex flex-col items-center justify-center">
+            <div className="bg-gray-800 rounded-full flex items-center justify-center p-5 size-20 transition-all duration-200 ease-in hover:cursor-pointer hover:bg-gray-900 hover:scale-95">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="size-8 text-white"
+              >
+                <path
+                  opacity="0.4"
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M18.5822 5.41795C18.9728 5.80848 18.9728 6.44164 18.5822 6.83217L11.5822 13.8322C11.1917 14.2227 10.5585 14.2227 10.168 13.8322C9.77749 13.4416 9.77749 12.8085 10.168 12.418L17.168 5.41795C17.5585 5.02743 18.1917 5.02743 18.5822 5.41795Z"
+                  fill="currentColor"
+                ></path>
+                <path
+                  d="M11.4985 13.7192C12.1754 14.396 12.7426 14.9632 13.1029 15.4459C13.4632 15.9287 13.7903 16.554 13.5355 17.2576C13.2808 17.9612 12.6293 18.2321 12.0433 18.3724C11.4575 18.5126 10.6587 18.5852 9.70544 18.6718L8.35108 18.7949C7.78911 18.846 7.28973 18.8915 6.8878 18.871C6.45305 18.8488 5.99316 18.7454 5.62447 18.3767C5.25578 18.008 5.15231 17.5481 5.13015 17.1134C5.10966 16.7114 5.15511 16.212 5.20625 15.6501L5.32937 14.2957L5.32937 14.2957C5.416 13.3424 5.48858 12.5436 5.62877 11.9578C5.76901 11.3719 6.03998 10.7203 6.74357 10.4656C7.44716 10.2109 8.07244 10.5379 8.55529 10.8983C9.03798 11.2585 9.60512 11.8257 10.282 12.5026L11.4985 13.7192L11.4985 13.7192Z"
+                  fill="currentColor"
+                ></path>
+              </svg>
+            </div>
+            <div className="mt-2">Receive</div>
+          </div>
+          <div className="w-full flex flex-col items-center justify-center">
+            <div className="bg-gray-800 rounded-full flex items-center justify-center p-5 size-20 transition-all duration-200 ease-in hover:cursor-pointer hover:bg-gray-900 hover:scale-95">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="size-8 text-white"
+              >
+                <path
+                  opacity="0.4"
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M13.8322 10.1678C14.2227 10.5584 14.2227 11.1915 13.8322 11.582L6.83217 18.582C6.44164 18.9726 5.80848 18.9726 5.41795 18.582C5.02743 18.1915 5.02743 17.5584 5.41795 17.1678L12.418 10.1678C12.8085 9.77731 13.4416 9.77731 13.8322 10.1678Z"
+                  fill="currentColor"
+                ></path>
+                <path
+                  d="M17.1134 5.13009C17.5481 5.15225 18.008 5.25572 18.3767 5.62441C18.7454 5.9931 18.8488 6.45299 18.871 6.88774C18.8915 7.28966 18.846 7.78904 18.7949 8.351L18.6718 9.70541V9.70542C18.5852 10.6587 18.5126 11.4575 18.3724 12.0433C18.2321 12.6292 17.9612 13.2808 17.2576 13.5355C16.554 13.7902 15.9287 13.4632 15.4459 13.1028C14.9632 12.7425 14.396 12.1754 13.7192 11.4985L13.7192 11.4985L12.5026 10.2819L12.5026 10.2819C11.8257 9.60506 11.2585 9.03792 10.8983 8.55522C10.5379 8.07238 10.2109 7.4471 10.4656 6.74351C10.7203 6.03992 11.3719 5.76895 11.9578 5.62871C12.5436 5.48852 13.3424 5.41594 14.2957 5.32931L15.6501 5.20619C16.212 5.15505 16.7114 5.1096 17.1134 5.13009Z"
+                  fill="currentColor"
+                ></path>
+              </svg>
+            </div>
+            <div className="mt-2">Send</div>
+          </div>
           <div className="w-full flex flex-col items-center justify-center">
             <a
               href="https://faucet.polkadot.io/westend"
@@ -144,7 +214,7 @@ export function Wallet() {
             </a>
             <div className="mt-2">Buy</div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
