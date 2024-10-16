@@ -1,4 +1,5 @@
 import ReactDOM from "react-dom/client";
+import {Toaster} from "react-hot-toast";
 import {Wallet} from "./wallet";
 import {NodeProvider, WalletProvider} from "./providers";
 
@@ -12,6 +13,7 @@ root.render(
   <NodeProvider>
     <WalletProvider>
       <Wallet />
+      <Toaster />
     </WalletProvider>
   </NodeProvider>
 );

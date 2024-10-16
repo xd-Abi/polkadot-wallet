@@ -1,9 +1,11 @@
 import React, {useEffect, useState} from "react";
+import toast from "react-hot-toast";
 import {Loading} from "./common";
-import {useNode} from "./providers";
+import {useNode, useWallet} from "./providers";
 
 export function Wallet() {
   const {isReady} = useNode();
+  const {wallet} = useWallet();
   // const [api, setApi] = useState<ApiPromise | null>(null);
   // const [address, setAddress] = useState<string>("");
   // const [keyPair, setKeyPair] = useState<any>(null);
@@ -92,8 +94,16 @@ export function Wallet() {
   //   }
   // };
 
+  const receive = () => {
+    navigator.clipboard.writeText(wallet.address);
+    toast("Copied address to clipboard");
+  };
+
   return (
-    <Loading loading={!isReady} caption="Initializing node...">
+    <Loading
+      loading={!isReady || !wallet.isReady}
+      caption={!isReady ? "Initializing node..." : "Loading wallet..."}
+    >
       <div className="w-full min-h-screen bg-black text-white p-4 font-roboto">
         <div className="max-w-lg mx-auto mt-20">
           <div className="text-5xl font-bold">Wallet</div>
@@ -108,8 +118,17 @@ export function Wallet() {
               <div className="text-white text-opacity-80 text-sm">CRYPTO</div>
             </div>
             <div className="h-full w-full flex items-end justify-between">
-              <div className="text-white text-xl font-medium">
-                {/* {address.substring(0, 6)} ... {address.substring(42)} */}
+              <div className="flex flex-col items-start">
+                <div className="text-white text-opacity-70 text-sm font-medium">
+                  {wallet.isReady && wallet.address.substring(0, 6)} ...{" "}
+                  {wallet.isReady && wallet.address.substring(42)}
+                </div>
+                <div className="flex text-2xl font-medium items-center">
+                  {wallet.balance}
+                  <span className="text-white text-opacity-50 text-base ml-1">
+                    WND
+                  </span>
+                </div>
               </div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -171,9 +190,12 @@ export function Wallet() {
             </div>
           </div>
           <div className="w-full grid grid-cols-4 mt-10">
-            <div className="w-full flex items-center justify-center">
+            <div
+              className="w-full flex items-center justify-center"
+              onClick={receive}
+            >
               <div className="flex flex-col gap-2 group items-center justify-center">
-                <div className="size-[4.25rem] bg-gray4 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-white hover:cursor-pointer">
+                <div className="size-[4.25rem] bg-gray6 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-white hover:cursor-pointer">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -202,7 +224,7 @@ export function Wallet() {
             </div>
             <div className="w-full flex items-center justify-center">
               <div className="flex flex-col gap-2 group items-center justify-center">
-                <div className="size-[4.25rem] bg-gray4 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-white hover:cursor-pointer">
+                <div className="size-[4.25rem] bg-gray6 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-white hover:cursor-pointer">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -235,7 +257,7 @@ export function Wallet() {
                 target="_blank"
                 className="flex flex-col gap-2 group items-center justify-center"
               >
-                <div className="size-[4.25rem] bg-gray4 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-white hover:cursor-pointer">
+                <div className="size-[4.25rem] bg-gray6 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-white hover:cursor-pointer">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -266,7 +288,7 @@ export function Wallet() {
             </div>
             <div className="w-full flex items-center justify-center">
               <div className="flex flex-col gap-2 group items-center justify-center">
-                <div className="size-[4.25rem] bg-gray4 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-white hover:cursor-pointer">
+                <div className="size-[4.25rem] bg-gray6 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-white hover:cursor-pointer">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"

@@ -48,7 +48,7 @@ export function WalletProvider(props: PropsWithChildren) {
 
       setKeyPair(pair);
 
-      const data = await api.query.system.account(keyPair!.address);
+      const data = await api.query.system.account(pair.address);
       const {
         data: {free},
       } = JSON.parse(data.toString());
