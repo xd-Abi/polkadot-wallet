@@ -6,7 +6,7 @@ import {NodeContext} from "./context";
 
 export function NodeProvider(props: PropsWithChildren) {
   const [api, setApi] = useState<ApiPromise | null>(null);
-  const [isReady, setIsReady] = useState<boolean>(true);
+  const [isReady, setIsReady] = useState<boolean>(false);
 
   useEffect(() => {
     const initNode = async () => {
