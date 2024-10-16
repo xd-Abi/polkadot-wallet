@@ -9,11 +9,14 @@ import {
   mnemonicValidate,
 } from "@polkadot/util-crypto";
 import {KeyringPair} from "@polkadot/keyring/types";
+import {Transaction} from "./interfaces";
+import axios from "axios";
 
 export function WalletProvider(props: PropsWithChildren) {
-  const [keyPair, setKeyPair] = useState<KeyringPair>();
+  const [keyPair, setKeyPair] = useState<KeyringPair | null>(null);
   const [mnemonic, setMnemonic] = useState<string>("");
   const [balance, setBalance] = useState<number>(0);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
   const {api, isReady} = useNode();
@@ -52,7 +55,9 @@ export function WalletProvider(props: PropsWithChildren) {
       const {
         data: {free},
       } = JSON.parse(data.toString());
-      setBalance(free);
+
+      // free is the balance in planks. One WND = 10^12 planks.
+      setBalance(free / Math.pow(10, 12));
     };
 
     initWallet()
@@ -60,12 +65,51 @@ export function WalletProvider(props: PropsWithChildren) {
       .catch(console.error);
   }, [isReady]);
 
+  useEffect(() => {
+    if (!keyPair) {
+      return;
+    }
+
+    // Note: There is no easy option to retrieve all transactions of an account
+    // in Polkadot RPC Endpoints. We have to use some sort of indexer like Subscan to do that for us.
+    axios
+      .post(
+        "https://westend.api.subscan.io/api/v2/scan/transfers",
+        {
+          address: keyPair.address,
+          // We only show the latest 100 transactions
+          row: 100,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-Key": process.env.SUBSCAN_KEY,
+          },
+        }
+      )
+      .then(response => {
+        const transactions: Transaction[] = response.data.data.transfers.map(
+          (transfer: any) => ({
+            hash: transfer.hash,
+            status: transfer.success ? "successful" : "failed",
+            amount: parseFloat(transfer.amount_v2) / Math.pow(10, 12),
+            timestamp: new Date(transfer.block_timestamp * 1000),
+          })
+        );
+
+        setTransactions(transactions);
+      })
+      .catch(console.error);
+  }, [keyPair]);
+
   return (
     <WalletContext.Provider
       value={{
         address: keyPair?.address!,
         balance: balance,
         mnemonic: mnemonic,
+        keyPair: keyPair,
+        transactions: transactions,
         isReady: isLoaded,
       }}
     >

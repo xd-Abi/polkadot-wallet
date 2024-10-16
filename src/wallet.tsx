@@ -2,102 +2,21 @@ import React, {useEffect, useState} from "react";
 import toast from "react-hot-toast";
 import {Loading} from "./common";
 import {useNode, useWallet} from "./providers";
+import {useForm} from "react-hook-form";
 
 export function Wallet() {
+  const [isSendPopupOpen, setIsSendPopupOpen] = useState(false);
+
   const {isReady} = useNode();
-  const {wallet} = useWallet();
-  // const [api, setApi] = useState<ApiPromise | null>(null);
-  // const [address, setAddress] = useState<string>("");
-  // const [keyPair, setKeyPair] = useState<any>(null);
-  // const [recipient, setRecipient] = useState<string>("");
-  // const [amount, setAmount] = useState<string>("");
-  // const [mnemonic, setMnemonic] = useState<string>("");
-  // const [balance, setBalance] = useState<string>("");
-
-  // useEffect(() => {
-  //   const initWallet = async () => {
-  //     const provider = new ScProvider(Sc, WellKnownChain.westend2);
-  //     await provider.connect();
-  //     const api = await ApiPromise.create({ provider });
-  //     setApi(api);
-
-  //     await cryptoWaitReady();
-  //     let walletMnemonic = localStorage.getItem("polkadot_mnemonic");
-
-  //     if (!walletMnemonic) {
-  //       const generatedMnemonic = mnemonicGenerate();
-
-  //       const isValid = mnemonicValidate(generatedMnemonic);
-  //       if (!isValid) {
-  //         console.error("Invalid mnemonic generated.");
-  //         return;
-  //       }
-
-  //       localStorage.setItem("polkadot_mnemonic", generatedMnemonic);
-  //       walletMnemonic = generatedMnemonic;
-  //     }
-
-  //     const keyring = new Keyring({ type: "sr25519" });
-  //     const miniSecret = mnemonicToMiniSecret(walletMnemonic);
-  //     const pair = keyring.addFromSeed(miniSecret);
-
-  //     setMnemonic(walletMnemonic);
-  //     setKeyPair(pair);
-  //     setAddress(pair.address);
-
-  //     const data = await api.query.system.account(pair.address);
-  //     const {
-  //       data: { free },
-  //     } = JSON.parse(data.toString());
-  //     setBalance(free);
-  //   };
-
-  //   initWallet().catch(console.error);
-  // }, []);
-
-  // const transfer = async () => {
-  //   if (!keyPair || !recipient || !amount || !api) {
-  //     console.error("Missing required details to send funds.");
-  //     return;
-  //   }
-
-  //   if (!api.isReady) {
-  //     console.error("API is not ready.");
-  //     return;
-  //   }
-
-  //   try {
-  //     const to = decodeAddress(recipient);
-  //     const transfer = api.tx.balances.transferAllowDeath(to, BigInt(amount));
-  //     const unsub = await transfer.signAndSend(
-  //       keyPair,
-  //       ({ status, events }: any) => {
-  //         if (status.isInBlock) {
-  //           console.log(
-  //             "Transaction included at blockHash",
-  //             status.asInBlock.toHex()
-  //           );
-  //         } else if (status.isFinalized) {
-  //           console.log(
-  //             "Transaction finalized at blockHash",
-  //             status.asFinalized.toHex()
-  //           );
-  //         }
-
-  //         events.forEach(({ event: { method, section }, phase }: any) => {
-  //           console.log("Event:", phase.toString(), `: ${section}.${method}`);
-  //         });
-  //       }
-  //     );
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // };
+  const {wallet, transfer} = useWallet();
+  const {register, handleSubmit} = useForm();
 
   const receive = () => {
     navigator.clipboard.writeText(wallet.address);
     toast("Copied address to clipboard");
   };
+
+  console.log(wallet.transactions);
 
   return (
     <Loading
@@ -195,14 +114,14 @@ export function Wallet() {
               onClick={receive}
             >
               <div className="flex flex-col gap-2 group items-center justify-center">
-                <div className="size-[4.25rem] bg-gray6 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-white hover:cursor-pointer">
+                <div className="size-[4.25rem] bg-gray6 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-gray4 hover:cursor-pointer">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
                     height="24"
                     viewBox="0 0 24 24"
                     fill="none"
-                    className="size-8 text-white group-hover:text-black"
+                    className="size-8 text-white"
                   >
                     <path
                       opacity="0.4"
@@ -222,16 +141,22 @@ export function Wallet() {
                 </div>
               </div>
             </div>
-            <div className="w-full flex items-center justify-center">
-              <div className="flex flex-col gap-2 group items-center justify-center">
-                <div className="size-[4.25rem] bg-gray6 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-white hover:cursor-pointer">
+            <div
+              className="w-full flex items-center justify-center"
+              onClick={() => setIsSendPopupOpen(prev => !prev)}
+            >
+              <div
+                className="flex flex-col gap-2 group items-center justify-center"
+                data-active={isSendPopupOpen}
+              >
+                <div className="size-[4.25rem] bg-gray6 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-gray4 group-data-[active=true]:bg-white hover:cursor-pointer">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
                     height="24"
                     viewBox="0 0 24 24"
                     fill="none"
-                    className="size-8 text-white group-hover:text-black"
+                    className="size-8 text-white group-data-[active=true]:text-black"
                   >
                     <path
                       opacity="0.4"
@@ -246,7 +171,7 @@ export function Wallet() {
                     ></path>
                   </svg>
                 </div>
-                <div className="text-gray1 transition-all duration-200 ease-in group-hover:text-white">
+                <div className="text-gray1 transition-all duration-200 ease-in group-hover:text-white group-data-[active=true]:text-white">
                   Send
                 </div>
               </div>
@@ -257,14 +182,14 @@ export function Wallet() {
                 target="_blank"
                 className="flex flex-col gap-2 group items-center justify-center"
               >
-                <div className="size-[4.25rem] bg-gray6 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-white hover:cursor-pointer">
+                <div className="size-[4.25rem] bg-gray6 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-gray4 hover:cursor-pointer">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
                     height="24"
                     viewBox="0 0 24 24"
                     fill="none"
-                    className="size-8 text-white group-hover:text-black"
+                    className="size-8 text-white"
                   >
                     <path
                       opacity="0.4"
@@ -288,14 +213,14 @@ export function Wallet() {
             </div>
             <div className="w-full flex items-center justify-center">
               <div className="flex flex-col gap-2 group items-center justify-center">
-                <div className="size-[4.25rem] bg-gray6 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-white hover:cursor-pointer">
+                <div className="size-[4.25rem] bg-gray6 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-gray4 hover:cursor-pointer">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
                     height="24"
                     viewBox="0 0 24 24"
                     fill="none"
-                    className="size-8 text-white group-hover:text-black"
+                    className="size-8 text-white"
                   >
                     <path
                       d="M15.7138 4.29577C16.1006 4.69001 16.0945 5.32314 15.7003 5.70992L6.67027 14.5457L6.67025 14.5457C6.29581 14.9203 5.93244 15.2838 5.61629 15.5271C5.32406 15.7519 4.66669 16.1956 3.91819 15.905C3.16969 15.6145 3.04953 14.869 3.01731 14.5182C2.98245 14.1387 3.00694 13.6437 3.03216 13.1335L3.07997 12.1625C3.10435 11.6649 3.12813 11.1797 3.19945 10.803C3.26669 10.4478 3.45766 9.71857 4.20958 9.37706C4.97311 9.03027 5.59082 9.40861 5.86995 9.61238C6.16305 9.82634 6.4909 10.1544 6.82421 10.4879L7.39382 11.0575L14.2997 4.28227C14.6939 3.89549 15.327 3.90154 15.7138 4.29577Z"
@@ -313,6 +238,10 @@ export function Wallet() {
                 </div>
               </div>
             </div>
+          </div>
+          <div className="text-2xl font-semibold mt-16">Transactions</div>
+          <div className="w-full bg-gray6 px-5 py-7 rounded-xl mt-5">
+            <div className=""></div>
           </div>
         </div>
       </div>

@@ -1,8 +1,17 @@
-import {Keyring} from "@polkadot/api";
+import {KeyringPair} from "@polkadot/keyring/types";
 
 export interface Wallet {
   address: string;
   mnemonic: string;
   balance: number;
+  keyPair: KeyringPair | null;
   isReady: boolean;
+  transactions: Transaction[];
+}
+
+export interface Transaction {
+  hash: string;
+  status: "pending" | "successful" | "failed";
+  amount: number;
+  timestamp: Date;
 }
