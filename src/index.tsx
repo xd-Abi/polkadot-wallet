@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom/client";
 import {Wallet} from "./wallet";
-import {NodeProvider} from "./providers";
+import {NodeProvider, WalletProvider} from "./providers";
 
 import "./global.css";
 
@@ -10,6 +10,8 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <NodeProvider>
-    <Wallet />
+    <WalletProvider>
+      <Wallet />
+    </WalletProvider>
   </NodeProvider>
 );

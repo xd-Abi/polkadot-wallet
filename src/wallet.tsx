@@ -1,17 +1,6 @@
 import React, {useEffect, useState} from "react";
-import {ScProvider} from "@polkadot/rpc-provider/substrate-connect";
-import * as Sc from "@substrate/connect";
-import {WellKnownChain} from "@substrate/connect";
-import {ApiPromise, Keyring} from "@polkadot/api";
-import {
-  cryptoWaitReady,
-  decodeAddress,
-  mnemonicGenerate,
-  mnemonicToMiniSecret,
-  mnemonicValidate,
-} from "@polkadot/util-crypto";
-import {useNode} from "./providers";
 import {Loading} from "./common";
+import {useNode} from "./providers";
 
 export function Wallet() {
   const {isReady} = useNode();
