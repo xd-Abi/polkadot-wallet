@@ -8,4 +8,8 @@ const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 
-root.render(<NodeProvider>{/* <Wallet /> */}</NodeProvider>);
+root.render(
+  <NodeProvider>
+    <Wallet />
+  </NodeProvider>
+);
