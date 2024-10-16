@@ -1,7 +1,6 @@
 import {PropsWithChildren, useEffect, useState} from "react";
-import {WalletContext} from "./context";
+import axios from "axios";
 import {Keyring} from "@polkadot/api";
-import {useNode} from "../node";
 import {
   cryptoWaitReady,
   mnemonicGenerate,
@@ -9,8 +8,9 @@ import {
   mnemonicValidate,
 } from "@polkadot/util-crypto";
 import {KeyringPair} from "@polkadot/keyring/types";
+import {useNode} from "../node";
+import {WalletContext} from "./context";
 import {Transaction} from "./interfaces";
-import axios from "axios";
 
 export function WalletProvider(props: PropsWithChildren) {
   const [keyPair, setKeyPair] = useState<KeyringPair | null>(null);
@@ -91,6 +91,8 @@ export function WalletProvider(props: PropsWithChildren) {
         const transactions: Transaction[] = response.data.data.transfers.map(
           (transfer: any) => ({
             hash: transfer.hash,
+            from: transfer.from,
+            to: transfer.to,
             status: transfer.success ? "successful" : "failed",
             amount: parseFloat(transfer.amount_v2) / Math.pow(10, 12),
             timestamp: new Date(transfer.block_timestamp * 1000),

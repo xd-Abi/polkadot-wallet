@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from "react";
+import {useState} from "react";
+import {useForm} from "react-hook-form";
+import {formatDistanceToNowStrict} from "date-fns";
 import toast from "react-hot-toast";
 import {Loading} from "./common";
 import {useNode, useWallet} from "./providers";
-import {useForm} from "react-hook-form";
 
 export function Wallet() {
   const [isSendPopupOpen, setIsSendPopupOpen] = useState(false);
@@ -16,12 +17,14 @@ export function Wallet() {
     toast("Copied address to clipboard");
   };
 
-  console.log(wallet.transactions);
+  const shortAddress = (address: string) => {
+    return address.substring(0, 6) + "..." + address.substring(42);
+  };
 
   return (
     <Loading
       loading={!isReady || !wallet.isReady}
-      caption={!isReady ? "Initializing node..." : "Loading wallet..."}
+      caption={!isReady ? "Initializing node" : "Loading wallet"}
     >
       <div className="w-full min-h-screen bg-black text-white p-4 font-roboto">
         <div className="max-w-lg mx-auto mt-20">
@@ -39,8 +42,7 @@ export function Wallet() {
             <div className="h-full w-full flex items-end justify-between">
               <div className="flex flex-col items-start">
                 <div className="text-white text-opacity-70 text-sm font-medium">
-                  {wallet.isReady && wallet.address.substring(0, 6)} ...{" "}
-                  {wallet.isReady && wallet.address.substring(42)}
+                  {wallet.address && shortAddress(wallet.address)}
                 </div>
                 <div className="flex text-2xl font-medium items-center">
                   {wallet.balance}
@@ -241,7 +243,54 @@ export function Wallet() {
           </div>
           <div className="text-2xl font-semibold mt-16">Transactions</div>
           <div className="w-full bg-gray6 px-5 py-7 rounded-xl mt-5">
-            <div className=""></div>
+            {wallet.transactions.map((tx, index) => (
+              <a
+                href={`https://westend.subscan.io/extrinsic/${tx.hash}`}
+                target="_blank"
+                key={tx.hash}
+                className="flex w-full items-center justify-between gap-2 group hover:cursor-pointer data-[last=false]:pb-3 data-[last=true]:border-b border-gray4 data-[first=true]:border-transparent data-[first=false]:mt-2 transition-all duration-200 ease-in hover:scale-[101%]"
+                data-first={index === 0}
+                data-last={index === wallet.transactions.length - 1}
+              >
+                <div>
+                  <div className="text-lg font-medium">
+                    {tx.to === wallet.address
+                      ? shortAddress(tx.from)
+                      : shortAddress(tx.to)}
+                  </div>
+                  <div className="text-sm text-gray1 flex gap-1">
+                    {formatDistanceToNowStrict(tx.timestamp)} ago,{" "}
+                    {tx.status === "pending" && (
+                      <div className="flex text-yellow-600">
+                        pending
+                        <div className="animate-pending-dots [animation-delay:-0.3s]">
+                          .
+                        </div>
+                        <div className="animate-pending-dots [animation-delay:-0.15s]">
+                          .
+                        </div>
+                        <div className="animate-pending-dots">.</div>
+                      </div>
+                    )}
+                    {tx.status === "successful" && (
+                      <div className="flex text-emerald-500">successful</div>
+                    )}
+                    {tx.status === "failed" && (
+                      <div className="flex text-red-500">failed</div>
+                    )}
+                  </div>
+                </div>
+
+                <div
+                  className="text-2xl font-medium data-[received=true]:text-emerald-500 text-red-500"
+                  data-received={tx.to === wallet.address}
+                >
+                  {tx.to === wallet.address ? "+" : "-"}
+                  {tx.amount}
+                  <span className="text-sm font-normal text-gray1"> WND</span>
+                </div>
+              </a>
+            ))}
           </div>
         </div>
       </div>

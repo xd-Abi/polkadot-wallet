@@ -3,6 +3,15 @@ module.exports = {
   content: ["./src/**/*.{html,tsx,js}", "./public/index.html"],
   theme: {
     extend: {
+      keyframes: {
+        "pending-dots": {
+          "0%, 100%": {transform: "translateY(0)"},
+          "50%": {transform: "translateY(-1px)"},
+        },
+      },
+      animation: {
+        "pending-dots": "pending-dots 1s infinite",
+      },
       colors: {
         primary: "#fff",
         gray1: "#8e8e93",

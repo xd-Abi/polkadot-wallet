@@ -11,6 +11,8 @@ export interface Wallet {
 
 export interface Transaction {
   hash: string;
+  from: string;
+  to: string;
   status: "pending" | "successful" | "failed";
   amount: number;
   timestamp: Date;
