@@ -73,7 +73,7 @@ export function Transfer(props: Props) {
           </div>
         </div>
         <div className="mt-20 w-full flex justify-center">
-          <button className="text-xl px-5 py-2 bg-blue-500 rounded-xl flex items-center gap-2">
+          <button className="text-xl px-5 py-2 bg-blue-500 rounded-xl flex items-center gap-2 transition-all duration-200 ease-in hover:bg-blue-600">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
