@@ -8,4 +8,5 @@ export const WalletContext = React.createContext<Wallet>({
   keyPair: null,
   transactions: [],
   isReady: false,
+  transfer: async (address, amount) => {},
 });

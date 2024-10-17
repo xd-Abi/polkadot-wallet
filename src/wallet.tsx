@@ -5,16 +5,25 @@ import toast from "react-hot-toast";
 import {Loading} from "./common";
 import {useNode, useWallet} from "./providers";
 
+interface SendInterface {
+  address: string;
+  amount: string;
+}
+
 export function Wallet() {
   const [isSendPopupOpen, setIsSendPopupOpen] = useState(false);
 
   const {isReady} = useNode();
-  const {wallet, transfer} = useWallet();
-  const {register, handleSubmit} = useForm();
+  const wallet = useWallet();
+  const {register, handleSubmit} = useForm<SendInterface>();
 
   const receive = () => {
     navigator.clipboard.writeText(wallet.address);
     toast("Copied address to clipboard");
+  };
+
+  const send = (data: SendInterface) => {
+    wallet.transfer(data.address, +data.amount);
   };
 
   const shortAddress = (address: string) => {
@@ -241,6 +250,20 @@ export function Wallet() {
               </div>
             </div>
           </div>
+          <div>Send</div>
+          <form onSubmit={handleSubmit(send)}>
+            <input
+              className="text-black"
+              placeholder="To"
+              {...register("address")}
+            />
+            <input
+              className="text-black"
+              placeholder="Amount"
+              {...register("amount")}
+            />
+            <button type="submit">Send</button>
+          </form>
           <div className="text-2xl font-semibold mt-16">Transactions</div>
           <div className="w-full bg-gray6 px-5 py-7 rounded-xl mt-5">
             {wallet.transactions.map((tx, index) => (
@@ -248,7 +271,7 @@ export function Wallet() {
                 href={`https://westend.subscan.io/extrinsic/${tx.hash}`}
                 target="_blank"
                 key={tx.hash}
-                className="flex w-full items-center justify-between gap-2 group hover:cursor-pointer data-[last=false]:pb-3 data-[last=true]:border-b border-gray4 data-[first=true]:border-transparent data-[first=false]:mt-2 transition-all duration-200 ease-in hover:scale-[101%]"
+                className="flex w-full items-center justify-between gap-2 group hover:cursor-pointer data-[last=false]:pb-3 data-[last=false]:border-b border-gray4 data-[last=true]:border-transparent data-[first=false]:mt-2 transition-all duration-200 ease-in hover:scale-[101%]"
                 data-first={index === 0}
                 data-last={index === wallet.transactions.length - 1}
               >

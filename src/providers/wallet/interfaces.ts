@@ -7,6 +7,7 @@ export interface Wallet {
   keyPair: KeyringPair | null;
   isReady: boolean;
   transactions: Transaction[];
+  transfer: (address: string, amount: number) => Promise<void>;
 }
 
 export interface Transaction {
