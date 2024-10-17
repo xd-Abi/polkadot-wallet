@@ -1,34 +1,16 @@
-import {useState} from "react";
-import {useForm} from "react-hook-form";
 import toast from "react-hot-toast";
 
 interface Props {
   address: string;
-  transfer: (recipient: string, amount: number) => Promise<void>;
-}
-
-interface SendInterface {
-  recipient: string;
-  amount: number;
+  onTransfer: () => void;
 }
 
 export function ActionsPanel(props: Props) {
-  const [isSendPopupOpen, setIsSendPopupOpen] = useState<boolean>(false);
-  const {register, handleSubmit} = useForm<SendInterface>();
-  const {address, transfer} = props;
+  const {address, onTransfer} = props;
 
   const receive = () => {
     navigator.clipboard.writeText(address);
     toast("Copied address to clipboard");
-  };
-
-  const send = (data: SendInterface) => {
-    const promise = transfer(data.recipient, data.amount);
-    toast.promise(promise, {
-      loading: "Transaction in progress...",
-      success: "Transaction included in Block",
-      error: "Transaction failed",
-    });
   };
 
   return (
@@ -68,20 +50,17 @@ export function ActionsPanel(props: Props) {
         </div>
         <div
           className="w-full flex items-center justify-center"
-          onClick={() => setIsSendPopupOpen(prev => !prev)}
+          onClick={onTransfer}
         >
-          <div
-            className="flex flex-col gap-2 group items-center justify-center"
-            data-active={isSendPopupOpen}
-          >
-            <div className="size-[4.25rem] bg-gray6 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-gray4 group-data-[active=true]:bg-white hover:cursor-pointer">
+          <div className="flex flex-col gap-2 group items-center justify-center">
+            <div className="size-[4.25rem] bg-gray6 rounded-full flex items-center justify-center transition-all duration-200 ease-in group-hover:bg-gray4 hover:cursor-pointer">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
                 fill="none"
-                className="size-8 text-white group-data-[active=true]:text-black"
+                className="size-8 text-white"
               >
                 <path
                   opacity="0.4"
@@ -96,7 +75,7 @@ export function ActionsPanel(props: Props) {
                 ></path>
               </svg>
             </div>
-            <div className="text-gray1 transition-all duration-200 ease-in group-hover:text-white group-data-[active=true]:text-white">
+            <div className="text-gray1 transition-all duration-200 ease-in group-hover:text-white">
               Send
             </div>
           </div>
@@ -163,38 +142,6 @@ export function ActionsPanel(props: Props) {
             </div>
           </div>
         </div>
-      </div>
-      <div
-        className="max-h-0 opacity-0 data-[visible=true]:opacity-100 data-[visible=true]:max-h-screen transition-all duration-500 ease-in-out overflow-hidden"
-        data-visible={isSendPopupOpen}
-      >
-        <div className="text-2xl font-semibold mt-16">Transfer</div>
-        <form
-          className="w-full bg-gray6 px-5 pt-7 rounded-xl mt-5"
-          onSubmit={handleSubmit(send)}
-        >
-          <div className="text-gray2 font-medium">Your sending</div>
-          <div className="mt-2 bg-gray5 w-full rounded-xl flex items-center">
-            <input
-              className="w-full outline-none bg-transparent h-full px-2 py-3 text-white placeholder:text-gray2"
-              placeholder="1"
-              {...register("amount")}
-            />
-            <div className="pr-4 py-3 text-base text-gray2">WND</div>
-          </div>
-          <div className="text-gray2 font-medium mt-5">To</div>
-          <input
-            className="mt-2 bg-gray5 w-full rounded-xl px-2 py-3 text-lg outline-none text-white placeholder:text-gray2"
-            placeholder="5GU1cJ...cVeh38"
-            {...register("recipient")}
-          />
-          <div className="flex justify-center">
-            <button className="mt-5 px-5 py-2 bg-white text-black rounded-xl transition-all duration-200 ease-in hover:scale-105">
-              Send
-            </button>
-          </div>
-          <button></button>
-        </form>
       </div>
     </div>
   );

@@ -12,11 +12,13 @@ import {KeyringPair} from "@polkadot/keyring/types";
 import {Loading} from "./loading";
 import {BalanceCard} from "./balance";
 import {ActionsPanel} from "./actions";
+import {Transfer} from "./transfer";
 
 export function Wallet() {
   const [node, setNode] = useState<ApiPromise | null>(null);
   const [keyPair, setKeyPair] = useState<KeyringPair | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isTransferring, setIsTransferring] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const initNode = async () => {
@@ -48,19 +50,34 @@ export function Wallet() {
       .then(cryptoWaitReady)
       .then(setupWallet)
       .then(loadTransferHistory)
-      .then(() => setLoading(false))
+      .then(() => setIsLoading(false))
       .catch(console.error);
   }, []);
 
-  const transfer = async (recipient: string, amount: number) => {};
+  const transfer = async (recipient: string, amount: number) => {
+    console.log(amount);
+  };
 
   return (
-    <Loading loading={loading}>
+    <Loading loading={isLoading}>
       <div className="w-full min-h-screen bg-black text-white font-roboto p-4">
         <div className="max-w-lg mx-auto mt-6 lg:mt-20">
-          <div className="text-5xl font-bold">Wallet</div>
-          <BalanceCard address={keyPair?.address ?? ""} balance={0} />
-          <ActionsPanel address={keyPair?.address ?? ""} transfer={transfer} />
+          {!isTransferring && (
+            <>
+              <div className="text-5xl font-bold">Wallet</div>
+              <BalanceCard address={keyPair?.address ?? ""} balance={0} />
+              <ActionsPanel
+                address={keyPair?.address ?? ""}
+                onTransfer={() => setIsTransferring(true)}
+              />
+            </>
+          )}
+          {isTransferring && (
+            <Transfer
+              onBack={() => setIsTransferring(false)}
+              transfer={transfer}
+            />
+          )}
         </div>
       </div>
     </Loading>
