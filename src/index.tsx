@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom/client";
 import {Toaster} from "react-hot-toast";
-import {Wallet} from "./wallet";
+import {Wallet} from "./wallet/wallet";
 import {NodeProvider, WalletProvider} from "./providers";
 
 import "./global.css";
@@ -10,10 +10,14 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-  <NodeProvider>
-    <WalletProvider>
-      <Wallet />
-      <Toaster />
-    </WalletProvider>
-  </NodeProvider>
+  <>
+    <Toaster />
+    <Wallet />
+  </>
+  // <NodeProvider>
+  //   <WalletProvider>
+  //     <Wallet />
+  //     <Toaster />
+  //   </WalletProvider>
+  // </NodeProvider>
 );
