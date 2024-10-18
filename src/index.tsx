@@ -1,7 +1,8 @@
 import ReactDOM from "react-dom/client";
+import {BrowserRouter, Route, Routes} from "react-router-dom";
 import {Toaster} from "react-hot-toast";
-import {Wallet} from "./wallet/wallet";
-import {NodeProvider, WalletProvider} from "./providers";
+import {Home} from "./pages/home";
+import {Transfer} from "./pages/transfer";
 
 import "./global.css";
 
@@ -10,14 +11,11 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-  <>
+  <BrowserRouter>
     <Toaster />
-    <Wallet />
-  </>
-  // <NodeProvider>
-  //   <WalletProvider>
-  //     <Wallet />
-  //     <Toaster />
-  //   </WalletProvider>
-  // </NodeProvider>
+    <Routes>
+      <Route path="/" Component={Home} />
+      <Route path="/transfer" Component={Transfer} />
+    </Routes>
+  </BrowserRouter>
 );

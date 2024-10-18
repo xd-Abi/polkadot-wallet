@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import React, {PropsWithChildren, useEffect, useState} from "react";
 import {ScProvider} from "@polkadot/rpc-provider";
 import {
   cryptoWaitReady,
@@ -9,15 +9,20 @@ import {
 import * as Sc from "@substrate/connect";
 import {ApiPromise, Keyring} from "@polkadot/api";
 import {KeyringPair} from "@polkadot/keyring/types";
-import {Loading} from "./loading";
-import {BalanceCard} from "./balance";
-import {ActionsPanel} from "./actions";
-import {Transfer} from "./transfer";
+import {Wallet} from "./interfaces";
 
-export function Wallet() {
+export const WalletContext = React.createContext<Wallet>({
+  isReady: false,
+  address: "",
+  balance: 0,
+  transactions: [],
+  transfer: async (recipient: string, amount: number) => {},
+});
+
+export function WalletProvider(props: PropsWithChildren) {
   const [node, setNode] = useState<ApiPromise | null>(null);
   const [keyPair, setKeyPair] = useState<KeyringPair | null>(null);
-  const [isTransferring, setIsTransferring] = useState<boolean>(false);
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -57,27 +62,16 @@ export function Wallet() {
   const transfer = async (recipient: string, amount: number) => {};
 
   return (
-    <Loading loading={isLoading}>
-      <div className="w-full min-h-screen bg-black text-white font-roboto p-4">
-        <div className="max-w-lg mx-auto mt-6 md:mt-10">
-          {!isTransferring && (
-            <>
-              <div className="text-5xl font-bold">Wallet</div>
-              <BalanceCard address={keyPair?.address ?? ""} balance={0} />
-              <ActionsPanel
-                address={keyPair?.address ?? ""}
-                onTransfer={() => setIsTransferring(true)}
-              />
-            </>
-          )}
-          {isTransferring && (
-            <Transfer
-              onBack={() => setIsTransferring(false)}
-              transfer={transfer}
-            />
-          )}
-        </div>
-      </div>
-    </Loading>
+    <WalletContext.Provider
+      value={{
+        isReady: !isLoading,
+        address: keyPair?.address ?? "",
+        balance: 0,
+        transactions: [],
+        transfer: transfer,
+      }}
+    >
+      {props.children}
+    </WalletContext.Provider>
   );
 }
