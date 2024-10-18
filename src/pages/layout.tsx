@@ -1,17 +1,16 @@
-interface Props {
-  children: React.ReactNode;
-  loading: boolean;
-  caption: string;
-}
+import {Fragment, PropsWithChildren} from "react";
+import { useWallet } from "../wallet";
 
-export function Loading(props: Props) {
+export function Layout(props: PropsWithChildren) {
+  const {isReady} = useWallet();
+
   return (
-    <>
-      {props.loading && (
+    <Fragment>
+      {!isReady && (
         <div className="w-full min-h-screen bg-black flex flex-col items-center justify-center">
           <span className="loader"></span>
           <div className="text-gray2 mt-5 text-sm flex">
-            {props.caption}
+            Initializing wallet
             <div className="animate-pending-dots [animation-delay:-0.3s]">
               .
             </div>
@@ -22,7 +21,7 @@ export function Loading(props: Props) {
           </div>
         </div>
       )}
-      {!props.loading && props.children}
-    </>
+      {isReady && props.children}
+    </Fragment>
   );
 }
