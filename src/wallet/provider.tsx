@@ -7,11 +7,13 @@ import {
   mnemonicToMiniSecret,
   mnemonicValidate,
 } from "@polkadot/util-crypto";
-import * as Sc from "@substrate/connect";
 import {ApiPromise, Keyring, SubmittableResult} from "@polkadot/api";
 import {KeyringPair} from "@polkadot/keyring/types";
-import {Transaction, Wallet} from "./interfaces";
+import {SignedBlock} from "@polkadot/types/interfaces";
+import * as Sc from "@substrate/connect";
 import axios from "axios";
+
+import {Transaction, Wallet} from "./interfaces";
 
 export const WalletContext = React.createContext<Wallet>({
   isReady: false,
@@ -53,51 +55,41 @@ export function WalletProvider(props: PropsWithChildren) {
     };
 
     const loadTransferHistory = async (address: string) => {
-      const loadHistory = async () => {
-        // Note: There is no easy option to retrieve all transactions of an account
-        // in Polkadot RPC Endpoints. We have to use some sort of indexer like Subscan to do that for us.
-        await axios
-          .post(
-            "https://westend.api.subscan.io/api/v2/scan/transfers",
-            {
-              address: address,
-              // We only show the latest 100 transactions
-              row: 100,
+      // Note: There is no easy option to retrieve all transactions of an account
+      // in Polkadot RPC Endpoints. We have to use some sort of indexer like Subscan to do that for us.
+      await axios
+        .post(
+          "https://westend.api.subscan.io/api/v2/scan/transfers",
+          {
+            address: address,
+            // We only show the latest 100 transactions
+            row: 100,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "X-API-Key": process.env.SUBSCAN_KEY,
             },
-            {
-              headers: {
-                "Content-Type": "application/json",
-                "X-API-Key": process.env.SUBSCAN_KEY,
-              },
-            }
-          )
-          .then(response => {
-            if (response.data.data.transfers === null) {
-              return;
-            }
+          }
+        )
+        .then(response => {
+          if (response.data.data.transfers === null) {
+            return;
+          }
 
-            const transactions: Transaction[] =
-              response.data.data.transfers.map((transfer: any) => ({
-                hash: transfer.hash,
-                from: transfer.from,
-                to: transfer.to,
-                status: transfer.success ? "successful" : "failed",
-                amount: parseFloat(transfer.amount_v2) / Math.pow(10, 12),
-                timestamp: new Date(transfer.block_timestamp * 1000),
-              }));
+          const transactions: Transaction[] = response.data.data.transfers.map(
+            (transfer: any) => ({
+              hash: transfer.hash,
+              from: transfer.from,
+              to: transfer.to,
+              status: transfer.success ? "successful" : "failed",
+              amount: parseFloat(transfer.amount_v2) / Math.pow(10, 12),
+              timestamp: new Date(transfer.block_timestamp * 1000),
+            })
+          );
 
-            setTransactions(transactions);
-          });
-      };
-
-      setInterval(() => {
-        loadHistory();
-        // Load the transactions history using subscan every minute
-      }, 60000);
-
-      // There is no grantee that the interval is running directly
-      // upon initialization. That's why we call the loadHistory at least once.
-      await loadHistory();
+          setTransactions(transactions);
+        });
     };
 
     initNode()
@@ -113,6 +105,43 @@ export function WalletProvider(props: PropsWithChildren) {
       return;
     }
 
+    node.rpc.chain.subscribeFinalizedHeads(async head => {
+      const block: SignedBlock = await node.rpc.chain.getBlock(head.hash);
+
+      block.block.extrinsics.forEach(({method, signer, args}: any) => {
+        if (
+          method.section === "balances" &&
+          method.method.includes("transfer")
+        ) {
+          const from = signer.toString();
+          const to = args[0].toString();
+          const amount = args[1].toString();
+
+          if (to !== keyPair.address) {
+            return;
+          }
+
+          setTransactions(prev => [
+            ...prev,
+            {
+              hash: head.hash.toString(),
+              from: from,
+              to: to,
+              status: "successful",
+              amount: parseFloat(amount) / Math.pow(10, 12),
+              timestamp: new Date(),
+            },
+          ]);
+        }
+      });
+    });
+  }, [node, keyPair]);
+
+  useEffect(() => {
+    if (!node || !keyPair) {
+      return;
+    }
+
     const loadBalance = async () => {
       const data = await node!.query.system.account(keyPair.address);
       const {
@@ -122,7 +151,7 @@ export function WalletProvider(props: PropsWithChildren) {
     };
 
     loadBalance().catch(console.error);
-  }, [transactions]);
+  }, [transactions, node, keyPair]);
 
   const transfer = async (recipient: string, amount: number) => {
     if (isLoading || !node || !keyPair) {
