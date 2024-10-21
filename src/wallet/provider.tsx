@@ -53,43 +53,51 @@ export function WalletProvider(props: PropsWithChildren) {
     };
 
     const loadTransferHistory = async (address: string) => {
-      // Note: There is no easy option to retrieve all transactions of an account
-      // in Polkadot RPC Endpoints. We have to use some sort of indexer like Subscan to do that for us.
-      axios
-        .post(
-          "https://westend.api.subscan.io/api/v2/scan/transfers",
-          {
-            address: address,
-            // We only show the latest 100 transactions
-            row: 100,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "X-API-Key": process.env.SUBSCAN_KEY,
+      const loadHistory = async () => {
+        // Note: There is no easy option to retrieve all transactions of an account
+        // in Polkadot RPC Endpoints. We have to use some sort of indexer like Subscan to do that for us.
+        await axios
+          .post(
+            "https://westend.api.subscan.io/api/v2/scan/transfers",
+            {
+              address: address,
+              // We only show the latest 100 transactions
+              row: 100,
             },
-          }
-        )
-        .then(response => {
-          if (response.data.data.transfers === null) {
-            return;
-          }
+            {
+              headers: {
+                "Content-Type": "application/json",
+                "X-API-Key": process.env.SUBSCAN_KEY,
+              },
+            }
+          )
+          .then(response => {
+            if (response.data.data.transfers === null) {
+              return;
+            }
 
-          const transactions: Transaction[] = response.data.data.transfers.map(
-            (transfer: any) => ({
-              hash: transfer.hash,
-              from: transfer.from,
-              to: transfer.to,
-              status: transfer.success ? "successful" : "failed",
-              amount: parseFloat(transfer.amount_v2) / Math.pow(10, 12),
-              timestamp: new Date(transfer.block_timestamp * 1000),
-            })
-          );
+            const transactions: Transaction[] =
+              response.data.data.transfers.map((transfer: any) => ({
+                hash: transfer.hash,
+                from: transfer.from,
+                to: transfer.to,
+                status: transfer.success ? "successful" : "failed",
+                amount: parseFloat(transfer.amount_v2) / Math.pow(10, 12),
+                timestamp: new Date(transfer.block_timestamp * 1000),
+              }));
 
-          setTransactions(transactions);
-        });
+            setTransactions(transactions);
+          });
+      };
 
-      return address;
+      setInterval(() => {
+        loadHistory();
+        // Load the transactions history using subscan every minute
+      }, 60000);
+
+      // There is no grantee that the interval is running directly
+      // upon initialization. That's why we call the loadHistory at least once.
+      await loadHistory();
     };
 
     initNode()
