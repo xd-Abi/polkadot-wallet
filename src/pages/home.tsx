@@ -1,7 +1,7 @@
 import toast from "react-hot-toast";
 import {useWallet} from "../wallet";
 import {useNavigate} from "react-router-dom";
-import {add, formatDistanceToNowStrict} from "date-fns";
+import {formatDistanceToNowStrict} from "date-fns";
 
 export function Home() {
   const {address, balance, transactions} = useWallet();
