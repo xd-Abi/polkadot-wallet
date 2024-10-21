@@ -10,6 +10,8 @@ import {
 import {ApiPromise, Keyring, SubmittableResult} from "@polkadot/api";
 import {KeyringPair} from "@polkadot/keyring/types";
 import {SignedBlock} from "@polkadot/types/interfaces";
+import {AnyTuple} from "@polkadot/types/types";
+import {GenericExtrinsic} from "@polkadot/types";
 import * as Sc from "@substrate/connect";
 import axios from "axios";
 
@@ -108,32 +110,34 @@ export function WalletProvider(props: PropsWithChildren) {
     node.rpc.chain.subscribeFinalizedHeads(async head => {
       const block: SignedBlock = await node.rpc.chain.getBlock(head.hash);
 
-      block.block.extrinsics.forEach(({method, signer, args}: any) => {
-        if (
-          method.section === "balances" &&
-          method.method.includes("transfer")
-        ) {
-          const from = signer.toString();
-          const to = args[0].toString();
-          const amount = args[1].toString();
+      block.block.extrinsics.forEach(
+        ({method, signer, args}: GenericExtrinsic<AnyTuple>) => {
+          if (
+            method.section === "balances" &&
+            method.method.includes("transfer")
+          ) {
+            const from = signer.toString();
+            const to = args[0].toString();
+            const amount = args[1].toString();
 
-          if (to !== keyPair.address) {
-            return;
+            if (to !== keyPair.address) {
+              return;
+            }
+
+            setTransactions(prev => [
+              ...prev,
+              {
+                hash: head.hash.toString(),
+                from: from,
+                to: to,
+                status: "successful",
+                amount: parseFloat(amount) / Math.pow(10, 12),
+                timestamp: new Date(),
+              },
+            ]);
           }
-
-          setTransactions(prev => [
-            ...prev,
-            {
-              hash: head.hash.toString(),
-              from: from,
-              to: to,
-              status: "successful",
-              amount: parseFloat(amount) / Math.pow(10, 12),
-              timestamp: new Date(),
-            },
-          ]);
         }
-      });
+      );
     });
   }, [node, keyPair]);
 
