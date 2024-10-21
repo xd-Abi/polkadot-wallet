@@ -1,5 +1,5 @@
 import {Fragment, PropsWithChildren} from "react";
-import { useWallet } from "../wallet";
+import {useWallet} from "../wallet";
 
 export function Layout(props: PropsWithChildren) {
   const {isReady} = useWallet();
@@ -21,7 +21,11 @@ export function Layout(props: PropsWithChildren) {
           </div>
         </div>
       )}
-      {isReady && props.children}
+      {isReady && (
+        <div className="w-full min-h-screen bg-black text-white font-roboto p-4">
+          <div className="max-w-lg mx-auto mt-6 md:mt-10">{props.children}</div>
+        </div>
+      )}
     </Fragment>
   );
 }

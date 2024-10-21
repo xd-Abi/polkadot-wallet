@@ -14,14 +14,14 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <WalletProvider>
-    <BrowserRouter>
-      <Toaster />
-      <Layout>
+    <Toaster />
+    <Layout>
+      <BrowserRouter>
         <Routes>
           <Route path="/" Component={Home} />
           <Route path="/transfer" Component={Transfer} />
         </Routes>
-      </Layout>
-    </BrowserRouter>
+      </BrowserRouter>
+    </Layout>
   </WalletProvider>
 );
